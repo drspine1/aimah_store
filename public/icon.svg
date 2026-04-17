@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+  <!-- Rounded square background -->
+  <rect width="36" height="36" rx="9" fill="#92400e"/>
+  <!-- Top arc (cream) -->
+  <path d="M9 15 C9 9, 27 9, 27 15" stroke="#fef3c7" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <!-- Centre dot -->
+  <circle cx="18" cy="18" r="2.2" fill="#fbbf24"/>
+  <!-- Bottom arc (amber) -->
+  <path d="M27 21 C27 27, 9 27, 9 21" stroke="#fbbf24" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <!-- Accent dot -->
+  <circle cx="27" cy="11" r="2" fill="#fbbf24"/>
+</svg>
