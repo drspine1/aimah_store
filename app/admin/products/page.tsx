@@ -57,6 +57,8 @@ export default function AdminProductsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<ProductFormData>(EMPTY_FORM)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   // Image upload state
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -214,7 +216,7 @@ export default function AdminProductsPage() {
   }
 
   const handleDelete = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
+    setDeleteLoading(true)
     try {
       const res = await fetch(`/api/products?id=${productId}`, { method: 'DELETE' })
       const result = await res.json()
@@ -223,6 +225,9 @@ export default function AdminProductsPage() {
     } catch (error) {
       console.error('Error deleting product:', error)
       alert('Failed to delete product')
+    } finally {
+      setDeleteLoading(false)
+      setDeleteId(null)
     }
   }
 
@@ -539,7 +544,7 @@ export default function AdminProductsPage() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => setDeleteId(product.id)}
                       className="gap-1"
                     >
                       <Trash2 size={14} /> Delete
@@ -552,5 +557,50 @@ export default function AdminProductsPage() {
         )}
       </div>
     </div>
+
+    {/* ── Delete confirmation modal ── */}
+    {deleteId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={() => !deleteLoading && setDeleteId(null)}
+        />
+        {/* Modal */}
+        <div className="relative bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 max-w-sm w-full shadow-2xl shadow-amber-950/30">
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center">
+              <Trash2 size={26} className="text-red-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-amber-950 mb-1">Delete Product</h3>
+              <p className="text-stone-600 text-sm">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-amber-900">
+                  {products.find(p => p.id === deleteId)?.name ?? 'this product'}
+                </span>
+                ? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 w-full pt-2">
+              <button
+                onClick={() => setDeleteId(null)}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-amber-900 bg-amber-50 text-amber-900 transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(69,26,3)] hover:bg-amber-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteId)}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-red-700 bg-red-600 text-white transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(153,27,27)] hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }

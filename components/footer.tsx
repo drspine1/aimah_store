@@ -119,62 +119,45 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Shop */}
-            <div>
-              <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">
-                Shop
-              </h3>
-              <ul className="space-y-3">
-                {SHOP_LINKS.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-amber-200/60 text-sm hover:text-amber-300 transition"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {/* Link columns — 2-col on mobile, individual on desktop */}
+            <div className="col-span-1 md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
+              {/* Shop */}
+              <div>
+                <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">Shop</h3>
+                <ul className="space-y-3">
+                  {SHOP_LINKS.map(({ label, href }) => (
+                    <li key={label}>
+                      <Link href={href} className="text-amber-200/60 text-sm hover:text-amber-300 transition">{label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Account */}
+              <div>
+                <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">Account</h3>
+                <ul className="space-y-3">
+                  {ACCOUNT_LINKS.map(({ label, href }) => (
+                    <li key={label}>
+                      <Link href={href} className="text-amber-200/60 text-sm hover:text-amber-300 transition">{label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Company */}
+              <div className="col-span-2 md:col-span-1">
+                <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">Company</h3>
+                <ul className="space-y-3">
+                  {COMPANY_LINKS.map(({ label, href }) => (
+                    <li key={label}>
+                      <Link href={href} className="text-amber-200/60 text-sm hover:text-amber-300 transition">{label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
-            {/* Account */}
-            <div>
-              <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">
-                Account
-              </h3>
-              <ul className="space-y-3">
-                {ACCOUNT_LINKS.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-amber-200/60 text-sm hover:text-amber-300 transition"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="text-amber-300 font-semibold text-sm uppercase tracking-widest mb-4">
-                Company
-              </h3>
-              <ul className="space-y-3">
-                {COMPANY_LINKS.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-amber-200/60 text-sm hover:text-amber-300 transition"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </motion.div>
         </div>
 

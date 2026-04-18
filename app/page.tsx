@@ -65,11 +65,9 @@ function HeroSection() {
   }
 
   return (
-    <section className="bg-gradient-to-r from-amber-950 via-amber-900 to-stone-800 text-white overflow-hidden">
+    <section className="bg-gradient-to-b md:bg-gradient-to-r from-amber-950 via-amber-900 to-amber-800 md:to-stone-800 text-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-10 items-center">
-
-          {/* ── Left: content ── */}
           <div className="flex flex-col gap-6">
             {/* Badge */}
             <span className="inline-flex items-center gap-2 bg-amber-800/50 border border-amber-700/40 text-amber-300 text-xs font-semibold px-3 py-1.5 rounded-full w-fit uppercase tracking-widest">
@@ -120,8 +118,8 @@ function HeroSection() {
           <div className="relative flex flex-col items-center gap-4">
             {/* Main image frame */}
             <div className="relative w-full max-w-md mx-auto">
-              {/* Decorative frame */}
-              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-amber-700/30 to-orange-900/20 blur-xl" />
+              {/* Decorative frame — desktop only to avoid dark blob on mobile */}
+              <div className="hidden md:block absolute -inset-3 rounded-3xl bg-gradient-to-br from-amber-700/30 to-orange-900/20 blur-xl" />
               <div className="relative rounded-2xl overflow-hidden border-2 border-amber-700/30 shadow-2xl shadow-amber-950/50 aspect-[4/3]">
                 {HERO_SLIDES.map((slide, i) => (
                   <div
