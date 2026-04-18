@@ -343,9 +343,9 @@ export default function AboutPage() {
       {/* ── CTA ── */}
       <section className="relative">
         <BackgroundGradientAnimation
-          gradientBackgroundStart="rgb(69, 26, 3)" gradientBackgroundEnd="rgb(41, 18, 5)"
-          firstColor="120, 53, 15" secondColor="161, 88, 10" thirdColor="140, 65, 8"
-          fourthColor="100, 42, 10" fifthColor="150, 100, 20" pointerColor="130, 60, 10"
+          gradientBackgroundStart="rgb(41, 16, 2)" gradientBackgroundEnd="rgb(25, 11, 3)"
+          firstColor="80, 35, 8" secondColor="100, 55, 6" thirdColor="90, 42, 5"
+          fourthColor="65, 28, 7" fifthColor="95, 65, 12" pointerColor="85, 40, 7"
           blendingValue="soft-light" containerClassName="h-[26rem] w-full" interactive={true}
         >
           <div className="absolute z-50 inset-0 flex flex-col items-center justify-center px-6 md:px-10 text-center pointer-events-none">

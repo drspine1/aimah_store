@@ -106,7 +106,12 @@ function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full max-w-sm sm:max-w-none">
-              <CtaButton variant="primary">Shop Now</CtaButton>
+              <CtaButton
+                variant="primary"
+                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Shop Now
+              </CtaButton>
               <CtaButton href="/about" variant="outline">Learn More</CtaButton>
             </div>
           </div>
@@ -310,7 +315,7 @@ export default function HomePage() {
       <WorldwideSection />
 
       {/* ── Products ── */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
+      <section id="products" className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
         {/* Search bar */}
         <motion.div
