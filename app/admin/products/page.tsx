@@ -16,15 +16,11 @@ import { StarRating } from '@/components/ui/star-rating'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  'electronics',
   'clothing',
-  'books',
-  'home',
-  'sports',
-  'beauty',
+  'shoes',
   'toys',
-  'food',
-  'other',
+  'gadgets',
+  'electronics',
 ] as const
 
 type Category = typeof CATEGORIES[number] | ''

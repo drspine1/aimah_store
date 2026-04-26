@@ -10,10 +10,11 @@ import { ShoppingBag, Heart, Package, ShieldCheck, Mail, Github, Twitter } from 
 
 const SHOP_LINKS = [
   { label: 'All Products', href: '/' },
-  { label: 'Electronics', href: '/?category=electronics' },
   { label: 'Clothing', href: '/?category=clothing' },
-  { label: 'Books', href: '/?category=books' },
-  { label: 'Home & Garden', href: '/?category=home' },
+  { label: 'Shoes', href: '/?category=shoes' },
+  { label: 'Toys', href: '/?category=toys' },
+  { label: 'Gadgets', href: '/?category=gadgets' },
+  { label: 'Electronics', href: '/?category=electronics' },
 ]
 
 const ACCOUNT_LINKS = [

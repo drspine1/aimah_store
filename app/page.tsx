@@ -188,7 +188,7 @@ function HeroSection() {
   )
 }
 
-const CATEGORIES = ['all', 'electronics', 'clothing', 'books', 'home', 'sports', 'beauty', 'toys', 'food', 'other'] as const
+const CATEGORIES = ['all', 'clothing', 'shoes', 'toys', 'gadgets', 'electronics'] as const
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([])
