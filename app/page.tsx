@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProductCard } from '@/components/products/product-card'
@@ -12,7 +11,6 @@ import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus'
 import { TextGenerateEffect } from '@/components/ui/text-generate-effect'
 import { CtaButton } from '@/components/ui/cta-button'
 import { WorldwideSection } from '@/components/worldwide-section'
-import { fadeUp, scaleUp, viewport } from '@/lib/animations'
 import { Product, WishlistItem } from '@/lib/types'
 import { useCart } from '@/lib/store/cart'
 import { Search, X, Star, ShieldCheck, Truck } from 'lucide-react'
@@ -358,11 +356,7 @@ export default function HomePage() {
       <section id="products" className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
         {/* Results heading */}
-        <motion.div
-          className="mb-6"
-          initial="hidden" whileInView="visible" viewport={viewport}
-          variants={fadeUp} custom={0}
-        >
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-amber-950">
             {search
               ? `Results for "${search}"`
@@ -375,10 +369,12 @@ export default function HomePage() {
               {products.length} product{products.length !== 1 ? 's' : ''} found
             </p>
           )}
-        </motion.div>
+        </div>
 
         {loading ? (
-          <LoadingSpinner fullScreen={false} />
+          <div className="min-h-[300px] flex items-center justify-center">
+            <LoadingSpinner fullScreen={false} />
+          </div>
         ) : products.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-stone-500 text-lg mb-4">
@@ -398,19 +394,14 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product, i) => (
-              <motion.div
+            {products.map((product) => (
+              <ProductCard
                 key={product.id}
-                initial="hidden" whileInView="visible" viewport={viewport}
-                variants={scaleUp} custom={i * 0.06}
-              >
-                <ProductCard
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                  onAddToWishlist={handleAddToWishlist}
-                  isInWishlist={Boolean(wishlistMap[product.id])}
-                />
-              </motion.div>
+                product={product}
+                onAddToCart={handleAddToCart}
+                onAddToWishlist={handleAddToWishlist}
+                isInWishlist={Boolean(wishlistMap[product.id])}
+              />
             ))}
           </div>
         )}
