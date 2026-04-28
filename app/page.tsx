@@ -338,7 +338,10 @@ export default function HomePage() {
               <Button
                 key={cat}
                 variant={category === cat ? 'default' : 'outline'}
-                onClick={() => setCategory(cat)}
+                onClick={() => {
+                  setCategory(cat)
+                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
                 className={`capitalize ${
                   category === cat
                     ? 'bg-amber-800 hover:bg-amber-700 text-amber-50 border-amber-800'
