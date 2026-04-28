@@ -250,7 +250,7 @@ const defaultConfig: Required<Globe3DConfig> = {
   radius: 2, globeColor: "#1a1a2e",
   textureUrl: DEFAULT_EARTH_TEXTURE, bumpMapUrl: DEFAULT_BUMP_TEXTURE,
   showAtmosphere: false, atmosphereColor: "#4da6ff", atmosphereIntensity: 0.5, atmosphereBlur: 2,
-  bumpScale: 1, autoRotateSpeed: 0.3, enableZoom: false, enablePan: false,
+  bumpScale: 1, autoRotateSpeed: 2, enableZoom: false, enablePan: false,
   minDistance: 5, maxDistance: 15, initialRotation: { x: 0, y: 0 },
   markerSize: 0.06, showWireframe: false, wireframeColor: "#4a9eff",
   ambientIntensity: 0.6, pointLightIntensity: 1.5, backgroundColor: null,
