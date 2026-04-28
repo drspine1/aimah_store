@@ -75,7 +75,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-amber-50">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <Link href="/" className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-900 hover:underline mb-8">
+        <Link href="/#products" className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-900 hover:underline mb-8">
           <ArrowLeft size={20} />
           Back to Shopping
         </Link>
@@ -85,7 +85,7 @@ export default function CartPage() {
         {cartItems.length === 0 ? (
           <Card className="p-8 text-center border-amber-200">
             <p className="text-stone-600 text-lg mb-4">Your cart is empty</p>
-            <Link href="/">
+            <Link href="/#products">
               <Button className="bg-amber-800 hover:bg-amber-700 text-amber-50">Continue Shopping</Button>
             </Link>
           </Card>
@@ -195,7 +195,7 @@ export default function CartPage() {
                 <Button
                   variant="outline"
                   className="w-full mt-3 border-amber-300 text-amber-800 hover:bg-amber-100"
-                  onClick={() => router.push('/')}
+                  onClick={() => router.push('/#products')}
                 >
                   Continue Shopping
                 </Button>

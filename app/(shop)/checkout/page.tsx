@@ -245,7 +245,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-gray-600 mb-4">Your cart is empty</p>
-          <Button onClick={() => router.push('/')}>Back to Shopping</Button>
+          <Button onClick={() => router.push('/#products')}>Back to Shopping</Button>
         </Card>
       </div>
     )

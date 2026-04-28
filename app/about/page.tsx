@@ -99,7 +99,7 @@ export default function AboutPage() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center w-full max-w-sm sm:max-w-none mx-auto"
             variants={fadeUp} custom={0.5}
           >
-            <CtaButton href="/" variant="primary">
+            <CtaButton href="/#products" variant="primary">
               <span className="inline-flex items-center justify-center gap-2">Shop Now <ArrowRight size={16} /></span>
             </CtaButton>
             <CtaButton href="/auth/sign-up" variant="outline">Create Free Account</CtaButton>
@@ -374,7 +374,7 @@ export default function AboutPage() {
                   Create Free Account <ArrowRight size={13} />
                 </span>
               </CtaButton>
-              <CtaButton href="/" variant="outline">Browse Products</CtaButton>
+              <CtaButton href="/#products" variant="outline">Browse Products</CtaButton>
             </motion.div>
           </div>
         </BackgroundGradientAnimation>

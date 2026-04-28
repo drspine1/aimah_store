@@ -50,7 +50,7 @@ export default function OrdersPage() {
             <p className="text-stone-600 text-lg mb-4">
               You haven&apos;t placed any orders yet.
             </p>
-            <Link href="/">
+            <Link href="/#products">
               <Button className="bg-amber-800 hover:bg-amber-700 text-amber-50">Start Shopping</Button>
             </Link>
           </Card>

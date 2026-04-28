@@ -100,7 +100,7 @@ export default function OrderConfirmationPage() {
             <Link href="/orders">
               <Button className="bg-amber-800 hover:bg-amber-700 text-amber-50">View My Orders</Button>
             </Link>
-            <Link href="/">
+            <Link href="/#products">
               <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">Continue Shopping</Button>
             </Link>
           </div>
