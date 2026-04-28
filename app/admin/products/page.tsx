@@ -61,7 +61,7 @@ function ProductFormFields({
   imagePreview: string | null
   setImagePreview: React.Dispatch<React.SetStateAction<string | null>>
   uploading: boolean
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
 }) {
   const setField = (field: keyof ProductFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
