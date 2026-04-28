@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireUser, ok, err } from '@/lib/supabase/api-helpers'
 
-const MAX_LIMIT = 100
+const MAX_LIMIT = 200
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
   const limit = Math.min(
     MAX_LIMIT,
-    Math.max(1, parseInt(searchParams.get('limit') ?? '12', 10) || 12)
+    Math.max(1, parseInt(searchParams.get('limit') ?? '100', 10) || 100)
   )
 
   let query = supabase.from('products').select('*', { count: 'exact' })
