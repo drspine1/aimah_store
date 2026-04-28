@@ -8,11 +8,14 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function Page() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showRepeat, setShowRepeat] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -65,11 +68,21 @@ export default function Page() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password" className="text-stone-700">Password</Label>
-                  <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="border-amber-300" />
+                  <div className="relative">
+                    <Input id="password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="border-amber-300 pr-10" />
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="repeat-password" className="text-stone-700">Repeat Password</Label>
-                  <Input id="repeat-password" type="password" required value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} className="border-amber-300" />
+                  <div className="relative">
+                    <Input id="repeat-password" type={showRepeat ? 'text' : 'password'} required value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} className="border-amber-300 pr-10" />
+                    <button type="button" onClick={() => setShowRepeat((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                      {showRepeat ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
                 <Button type="submit" className="w-full bg-amber-800 hover:bg-amber-700 text-amber-50" disabled={isLoading}>
