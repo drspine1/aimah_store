@@ -332,19 +332,32 @@ export default function AdminProductsPage() {
     <div className="min-h-screen bg-amber-50 py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-amber-950">Product Management</h1>
-            <p className="text-stone-500 mt-1">{products.length} product{products.length !== 1 ? 's' : ''} total</p>
+        {/* Sticky toolbar: header + search */}
+        <div className="sticky top-[73px] z-40 bg-amber-50/95 backdrop-blur-sm border-b border-amber-200 shadow-sm -mx-4 md:-mx-6 px-4 md:px-6 py-4 mb-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div>
+              <h1 className="text-4xl font-bold text-amber-950">Product Management</h1>
+              <p className="text-stone-500 mt-1">{products.length} product{products.length !== 1 ? 's' : ''} total</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/admin/orders">
+                <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">Orders</Button>
+              </Link>
+              <Button onClick={() => { setAddFormData(EMPTY_FORM); setAddImageFile(null); setAddImagePreview(null); setShowAddForm((v) => !v) }} className="gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50">
+                <Plus size={20} /> Add Product
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Link href="/admin/orders">
-              <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">Orders</Button>
-            </Link>
-            <Button onClick={() => { setAddFormData(EMPTY_FORM); setAddImageFile(null); setAddImagePreview(null); setShowAddForm((v) => !v) }} className="gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50">
-              <Plus size={20} /> Add Product
-            </Button>
+          {/* Search */}
+          <div className="relative">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Input placeholder="Search products by name, category or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 border-amber-300 bg-white" />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -371,18 +384,7 @@ export default function AdminProductsPage() {
           </Card>
         )}
 
-        {/* ── Search ── */}
-        <div className="relative mb-6">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input placeholder="Search products by name, category or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 border-amber-300 bg-white" />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
-              <X size={16} />
-            </button>
-          )}
-        </div>
 
-        {/* ── Product list ── */}
         {filtered.length === 0 ? (
           <Card className="p-8 text-center border-amber-200">
             <p className="text-stone-600 text-lg">{search ? `No products match "${search}"` : 'No products yet.'}</p>

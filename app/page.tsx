@@ -312,41 +312,30 @@ export default function HomePage() {
       {/* ── Worldwide Section ── */}
       <WorldwideSection />
 
-      {/* ── Products ── */}
-      <section id="products" className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
-
-        {/* Search bar */}
-        <motion.div
-          className="relative mb-8"
-          initial="hidden" whileInView="visible" viewport={viewport}
-          variants={fadeUp} custom={0}
-        >
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input
-            placeholder="Search products..."
-            value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-12 pr-10 py-6 text-base border-amber-300 bg-white rounded-xl shadow-sm focus:ring-amber-400"
-          />
-          {searchInput && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-              aria-label="Clear search"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </motion.div>
-
-        {/* Category filters */}
-        <motion.div
-          className="mb-8"
-          initial="hidden" whileInView="visible" viewport={viewport}
-          variants={fadeUp} custom={0.1}
-        >
-          <h2 className="text-2xl font-bold text-amber-950 mb-4">Shop by Category</h2>
-          <div className="flex gap-2 flex-wrap">
+      {/* ── Sticky search + category bar ── */}
+      <div className="sticky top-[73px] z-40 bg-amber-50/95 backdrop-blur-sm border-b border-amber-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 space-y-3">
+          {/* Search bar */}
+          <div className="relative">
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Input
+              placeholder="Search products..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-12 pr-10 py-5 text-base border-amber-300 bg-white rounded-xl shadow-sm focus:ring-amber-400"
+            />
+            {searchInput && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                aria-label="Clear search"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          {/* Category filters */}
+          <div className="flex gap-2 flex-wrap pb-1">
             {CATEGORIES.map((cat) => (
               <Button
                 key={cat}
@@ -362,7 +351,11 @@ export default function HomePage() {
               </Button>
             ))}
           </div>
-        </motion.div>
+        </div>
+      </div>
+
+      {/* ── Products ── */}
+      <section id="products" className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
         {/* Results heading */}
         <motion.div
