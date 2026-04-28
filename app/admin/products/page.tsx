@@ -42,6 +42,110 @@ const EMPTY_FORM: ProductFormData = {
   rating: '0', reviews_count: '0',
 }
 
+// ─── Shared form fields ────────────────────────────────────────────────────────
+
+function ProductFormFields({
+  formData,
+  setFormData,
+  imageFile,
+  setImageFile,
+  imagePreview,
+  setImagePreview,
+  uploading,
+  fileInputRef,
+}: {
+  formData: ProductFormData
+  setFormData: React.Dispatch<React.SetStateAction<ProductFormData>>
+  imageFile: File | null
+  setImageFile: React.Dispatch<React.SetStateAction<File | null>>
+  imagePreview: string | null
+  setImagePreview: React.Dispatch<React.SetStateAction<string | null>>
+  uploading: boolean
+  fileInputRef: React.RefObject<HTMLInputElement>
+}) {
+  const setField = (field: keyof ProductFormData) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+    setFormData((prev) => ({ ...prev, image_url: '' }))
+  }
+
+  return (
+    <div className="space-y-4">
+      <Input placeholder="Product Name" required value={formData.name} onChange={setField('name')} className="border-amber-300" />
+
+      <textarea
+        placeholder="Description"
+        className="w-full px-4 py-2 border border-amber-300 rounded-lg bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
+        rows={3}
+        value={formData.description}
+        onChange={setField('description')}
+      />
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <Input placeholder="Price" type="number" step="0.01" min="0" required value={formData.price} onChange={setField('price')} className="border-amber-300" />
+        <Input placeholder="Stock" type="number" min="0" required value={formData.stock} onChange={setField('stock')} className="border-amber-300" />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+        <select required value={formData.category} onChange={setField('category')} className="w-full px-4 py-2 border border-amber-300 rounded-lg bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 capitalize">
+          <option value="" disabled>Select a category</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat} className="capitalize">{cat}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-2">Rating (click to set)</label>
+          <div className="flex items-center gap-3">
+            <StarRating value={parseFloat(formData.rating) || 0} onChange={(r) => setFormData((prev) => ({ ...prev, rating: r.toString() }))} size={24} />
+            <span className="text-sm text-stone-500">{formData.rating || '0'} / 5</span>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Reviews Count</label>
+          <Input placeholder="e.g. 128" type="number" min="0" value={formData.reviews_count} onChange={setField('reviews_count')} className="border-amber-300" />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-stone-700 mb-2">Product Image</label>
+        {imagePreview && (
+          <div className="relative w-32 h-32 mb-3">
+            <Image src={imagePreview} alt="Preview" fill className="object-cover rounded-lg border border-amber-200" />
+            <button type="button" onClick={() => { setImagePreview(null); setImageFile(null); setFormData((prev) => ({ ...prev, image_url: '' })) }} className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center">
+              <X size={12} />
+            </button>
+          </div>
+        )}
+        <div className="flex gap-3 items-center flex-wrap">
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 border-2 border-amber-800 bg-amber-50 text-amber-900 text-sm font-semibold uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(69,26,3)] hover:bg-amber-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+            <Upload size={16} />
+            {imageFile ? 'Change Image' : 'Upload Image'}
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+          <span className="text-stone-400 text-sm">or</span>
+          <Input
+            placeholder="Paste image URL"
+            value={imageFile ? '' : formData.image_url}
+            onChange={(e) => { setImageFile(null); setImagePreview(e.target.value || null); setFormData((prev) => ({ ...prev, image_url: e.target.value })) }}
+            className="border-amber-300 flex-1 min-w-0"
+          />
+        </div>
+        {imageFile && <p className="text-xs text-stone-500 mt-1">Selected: {imageFile.name} ({(imageFile.size / 1024).toFixed(0)} KB)</p>}
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminProductsPage() {
@@ -50,35 +154,33 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState<ProductFormData>(EMPTY_FORM)
+
+  // Add product (inline)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [addFormData, setAddFormData] = useState<ProductFormData>(EMPTY_FORM)
+  const [addImageFile, setAddImageFile] = useState<File | null>(null)
+  const [addImagePreview, setAddImagePreview] = useState<string | null>(null)
+  const [addUploading, setAddUploading] = useState(false)
+  const addFileInputRef = useRef<HTMLInputElement>(null)
+
+  // Edit product (modal)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editFormData, setEditFormData] = useState<ProductFormData>(EMPTY_FORM)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
+  const [editUploading, setEditUploading] = useState(false)
+  const editFileInputRef = useRef<HTMLInputElement>(null)
+
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
-
-  // Image upload state
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const router = useRouter()
 
   useEffect(() => { checkAdminAndFetch() }, [])
 
-  // Filter products by search
   useEffect(() => {
     const q = search.toLowerCase()
-    setFiltered(
-      q
-        ? products.filter(
-            (p) =>
-              p.name.toLowerCase().includes(q) ||
-              (p.category ?? '').toLowerCase().includes(q) ||
-              (p.description ?? '').toLowerCase().includes(q)
-          )
-        : products
-    )
+    setFiltered(q ? products.filter((p) => p.name.toLowerCase().includes(q) || (p.category ?? '').toLowerCase().includes(q) || (p.description ?? '').toLowerCase().includes(q)) : products)
   }, [search, products])
 
   const checkAdminAndFetch = async () => {
@@ -86,11 +188,8 @@ export default function AdminProductsPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-
-      const { data: profile } = await supabase
-        .from('profiles').select('is_admin').eq('id', user.id).single()
+      const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
       if (!profile?.is_admin) { router.push('/'); return }
-
       setIsAdmin(true)
       await fetchProducts()
     } catch (error) {
@@ -111,105 +210,92 @@ export default function AdminProductsPage() {
     }
   }
 
-  const resetForm = () => {
-    setFormData(EMPTY_FORM)
-    setEditingId(null)
-    setImageFile(null)
-    setImagePreview(null)
-  }
-
-  // ── Image handling ──────────────────────────────────────────────────────────
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
-    // Clear the URL field since we're using a file
-    setFormData((prev) => ({ ...prev, image_url: '' }))
-  }
-
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return formData.image_url || null
-
+  const uploadImage = async (imageFile: File | null, imageUrl: string, setUploading: (v: boolean) => void): Promise<string | null> => {
+    if (!imageFile) return imageUrl || null
     setUploading(true)
     try {
       const supabase = createClient()
       const ext = imageFile.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-      const { error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, imageFile, { upsert: false })
-
+      const { error } = await supabase.storage.from('product-images').upload(fileName, imageFile, { upsert: false })
       if (error) throw error
-
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName)
-
+      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName)
       return data.publicUrl
     } catch (error) {
       console.error('Image upload error:', error)
-      alert('Failed to upload image. Make sure the "product-images" storage bucket exists in Supabase.')
+      alert('Failed to upload image.')
       return null
     } finally {
       setUploading(false)
     }
   }
 
-  // ── Form submit ─────────────────────────────────────────────────────────────
+  // ── Add (POST) ──────────────────────────────────────────────────────────────
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    const imageUrl = await uploadImage()
-
+    const imageUrl = await uploadImage(addImageFile, addFormData.image_url, setAddUploading)
     const productData = {
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      image_url: imageUrl ?? '',
-      stock: parseInt(formData.stock, 10),
-      category: formData.category,
-      rating: parseFloat(formData.rating) || 0,
-      reviews_count: parseInt(formData.reviews_count, 10) || 0,
+      name: addFormData.name, description: addFormData.description,
+      price: parseFloat(addFormData.price), image_url: imageUrl ?? '',
+      stock: parseInt(addFormData.stock, 10), category: addFormData.category,
+      rating: parseFloat(addFormData.rating) || 0,
+      reviews_count: parseInt(addFormData.reviews_count, 10) || 0,
     }
-
     try {
-      const res = await fetch('/api/products', {
-        method: editingId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingId ? { id: editingId, ...productData } : productData),
-      })
+      const res = await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) })
       const result = await res.json()
       if (!result.success) throw new Error(result.error)
-
       await fetchProducts()
-      setShowForm(false)
-      resetForm()
+      setShowAddForm(false)
+      setAddFormData(EMPTY_FORM)
+      setAddImageFile(null)
+      setAddImagePreview(null)
     } catch (error) {
-      console.error('Error saving product:', error)
-      alert('Failed to save product')
+      console.error('Error creating product:', error)
+      alert('Failed to create product')
     }
   }
 
-  const handleEdit = (product: Product) => {
-    setFormData({
-      name: product.name,
-      description: product.description ?? '',
-      price: product.price.toString(),
-      image_url: product.image_url ?? '',
-      stock: product.stock.toString(),
-      category: (product.category ?? '') as Category,
-      rating: product.rating.toString(),
-      reviews_count: product.reviews_count.toString(),
+  // ── Edit (PUT) ──────────────────────────────────────────────────────────────
+
+  const openEditModal = (product: Product) => {
+    setEditFormData({
+      name: product.name, description: product.description ?? '',
+      price: product.price.toString(), image_url: product.image_url ?? '',
+      stock: product.stock.toString(), category: (product.category ?? '') as Category,
+      rating: product.rating.toString(), reviews_count: product.reviews_count.toString(),
     })
-    setImagePreview(product.image_url ?? null)
-    setImageFile(null)
-    setEditingId(product.id)
-    setShowForm(true)
+    setEditImagePreview(product.image_url ?? null)
+    setEditImageFile(null)
+    setEditingProduct(product)
   }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingProduct) return
+    const imageUrl = await uploadImage(editImageFile, editFormData.image_url, setEditUploading)
+    const productData = {
+      id: editingProduct.id,
+      name: editFormData.name, description: editFormData.description,
+      price: parseFloat(editFormData.price), image_url: imageUrl ?? '',
+      stock: parseInt(editFormData.stock, 10), category: editFormData.category,
+      rating: parseFloat(editFormData.rating) || 0,
+      reviews_count: parseInt(editFormData.reviews_count, 10) || 0,
+    }
+    try {
+      const res = await fetch('/api/products', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) })
+      const result = await res.json()
+      if (!result.success) throw new Error(result.error)
+      await fetchProducts()
+      setEditingProduct(null)
+    } catch (error) {
+      console.error('Error updating product:', error)
+      alert('Failed to update product')
+    }
+  }
+
+  // ── Delete ──────────────────────────────────────────────────────────────────
 
   const handleDelete = async (productId: string) => {
     setDeleteLoading(true)
@@ -226,10 +312,6 @@ export default function AdminProductsPage() {
       setDeleteId(null)
     }
   }
-
-  const setField = (field: keyof ProductFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
 
   if (loading) return <LoadingSpinner />
 
@@ -258,197 +340,30 @@ export default function AdminProductsPage() {
           </div>
           <div className="flex gap-2">
             <Link href="/admin/orders">
-              <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">
-                Orders
-              </Button>
+              <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">Orders</Button>
             </Link>
-            <Button
-              onClick={() => { resetForm(); setShowForm((v) => !v) }}
-              className="gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50"
-            >
-              <Plus size={20} />
-              Add Product
+            <Button onClick={() => { setAddFormData(EMPTY_FORM); setAddImageFile(null); setAddImagePreview(null); setShowAddForm((v) => !v) }} className="gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50">
+              <Plus size={20} /> Add Product
             </Button>
           </div>
         </div>
 
-        {/* ── Product Form ── */}
-        {showForm && (
+        {/* ── Add Product (inline) ── */}
+        {showAddForm && (
           <Card className="p-6 mb-8 border-amber-200">
-            <h2 className="text-2xl font-bold text-amber-950 mb-6">
-              {editingId ? 'Edit Product' : 'Create New Product'}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <Input
-                placeholder="Product Name"
-                required
-                value={formData.name}
-                onChange={setField('name')}
-                className="border-amber-300"
+            <h2 className="text-2xl font-bold text-amber-950 mb-6">Create New Product</h2>
+            <form onSubmit={handleAdd} className="space-y-4">
+              <ProductFormFields
+                formData={addFormData} setFormData={setAddFormData}
+                imageFile={addImageFile} setImageFile={setAddImageFile}
+                imagePreview={addImagePreview} setImagePreview={setAddImagePreview}
+                uploading={addUploading} fileInputRef={addFileInputRef}
               />
-
-              {/* Description */}
-              <textarea
-                placeholder="Description"
-                className="w-full px-4 py-2 border border-amber-300 rounded-lg bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                rows={4}
-                value={formData.description}
-                onChange={setField('description')}
-              />
-
-              {/* Price + Stock */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <Input
-                  placeholder="Price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  value={formData.price}
-                  onChange={setField('price')}
-                  className="border-amber-300"
-                />
-                <Input
-                  placeholder="Stock"
-                  type="number"
-                  min="0"
-                  required
-                  value={formData.stock}
-                  onChange={setField('stock')}
-                  className="border-amber-300"
-                />
-              </div>
-
-              {/* Category select */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
-                <select
-                  required
-                  value={formData.category}
-                  onChange={setField('category')}
-                  className="w-full px-4 py-2 border border-amber-300 rounded-lg bg-white text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-400 capitalize"
-                >
-                  <option value="" disabled>Select a category</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat} className="capitalize">{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Rating + Reviews */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Rating (click to set)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <StarRating
-                      value={parseFloat(formData.rating) || 0}
-                      onChange={(r) => setFormData((prev) => ({ ...prev, rating: r.toString() }))}
-                      size={24}
-                    />
-                    <span className="text-sm text-stone-500">
-                      {formData.rating || '0'} / 5
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
-                    Reviews Count
-                  </label>
-                  <Input
-                    placeholder="e.g. 128"
-                    type="number"
-                    min="0"
-                    value={formData.reviews_count}
-                    onChange={setField('reviews_count')}
-                    className="border-amber-300"
-                  />
-                </div>
-              </div>
-
-              {/* Image upload */}
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Product Image</label>
-
-                {/* Preview */}
-                {imagePreview && (
-                  <div className="relative w-32 h-32 mb-3">
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      fill
-                      className="object-cover rounded-lg border border-amber-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null)
-                        setImageFile(null)
-                        setFormData((prev) => ({ ...prev, image_url: '' }))
-                      }}
-                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex gap-3 items-center flex-wrap">
-                  {/* File upload button */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-amber-800 bg-amber-50 text-amber-900 text-sm font-semibold uppercase tracking-wide shadow-[2px_2px_0px_0px_rgba(69,26,3)] hover:bg-amber-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                  >
-                    <Upload size={16} />
-                    {imageFile ? 'Change Image' : 'Upload Image'}
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageSelect}
-                  />
-
-                  {/* OR paste URL */}
-                  <span className="text-stone-400 text-sm">or</span>
-                  <Input
-                    placeholder="Paste image URL"
-                    value={imageFile ? '' : formData.image_url}
-                    onChange={(e) => {
-                      setImageFile(null)
-                      setImagePreview(e.target.value || null)
-                      setFormData((prev) => ({ ...prev, image_url: e.target.value }))
-                    }}
-                    className="border-amber-300 flex-1 min-w-0"
-                  />
-                </div>
-                {imageFile && (
-                  <p className="text-xs text-stone-500 mt-1">
-                    Selected: {imageFile.name} ({(imageFile.size / 1024).toFixed(0)} KB)
-                  </p>
-                )}
-              </div>
-
-              {/* Actions */}
               <div className="flex gap-2 pt-2">
-                <Button
-                  type="submit"
-                  disabled={uploading}
-                  className="bg-amber-800 hover:bg-amber-700 text-amber-50"
-                >
-                  {uploading ? 'Uploading...' : editingId ? 'Update Product' : 'Create Product'}
+                <Button type="submit" disabled={addUploading} className="bg-amber-800 hover:bg-amber-700 text-amber-50">
+                  {addUploading ? 'Uploading...' : 'Create Product'}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-amber-300 text-amber-800 hover:bg-amber-100"
-                  onClick={() => { setShowForm(false); resetForm() }}
-                >
+                <Button type="button" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100" onClick={() => setShowAddForm(false)}>
                   Cancel
                 </Button>
               </div>
@@ -459,17 +374,9 @@ export default function AdminProductsPage() {
         {/* ── Search ── */}
         <div className="relative mb-6">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input
-            placeholder="Search products by name, category or description..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 border-amber-300 bg-white"
-          />
+          <Input placeholder="Search products by name, category or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 border-amber-300 bg-white" />
           {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-            >
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
               <X size={16} />
             </button>
           )}
@@ -478,11 +385,9 @@ export default function AdminProductsPage() {
         {/* ── Product list ── */}
         {filtered.length === 0 ? (
           <Card className="p-8 text-center border-amber-200">
-            <p className="text-stone-600 text-lg">
-              {search ? `No products match "${search}"` : 'No products yet.'}
-            </p>
+            <p className="text-stone-600 text-lg">{search ? `No products match "${search}"` : 'No products yet.'}</p>
             {!search && (
-              <Button onClick={() => setShowForm(true)} className="mt-4 gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50">
+              <Button onClick={() => setShowAddForm(true)} className="mt-4 gap-2 bg-amber-800 hover:bg-amber-700 text-amber-50">
                 <Plus size={20} /> Create First Product
               </Button>
             )}
@@ -492,33 +397,20 @@ export default function AdminProductsPage() {
             {filtered.map((product) => (
               <Card key={product.id} className="p-5 border-amber-200">
                 <div className="flex gap-4 items-start">
-                  {/* Thumbnail */}
                   <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-amber-100 border border-amber-200">
                     {product.image_url ? (
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
-                      />
+                      <Image src={product.image_url} alt={product.name} width={64} height={64} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-amber-400 text-xs">
-                        No img
-                      </div>
+                      <div className="w-full h-full flex items-center justify-center text-amber-400 text-xs">No img</div>
                     )}
                   </div>
-
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-bold text-amber-950 truncate">{product.name}</h3>
                     <p className="text-stone-500 text-sm line-clamp-1 mb-2">{product.description}</p>
                     <div className="flex gap-3 flex-wrap text-sm items-center">
                       <span className="font-bold text-amber-800">${product.price.toFixed(2)}</span>
                       <span className="text-stone-500">Stock: {product.stock}</span>
-                      <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium capitalize">
-                        {product.category}
-                      </span>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium capitalize">{product.category}</span>
                       {product.rating > 0 && (
                         <span className="flex items-center gap-1 text-amber-600 text-xs">
                           <Star size={12} className="fill-amber-400 text-amber-400" />
@@ -527,23 +419,11 @@ export default function AdminProductsPage() {
                       )}
                     </div>
                   </div>
-
-                  {/* Actions */}
                   <div className="flex gap-2 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(product)}
-                      className="gap-1 border-amber-300 text-amber-800 hover:bg-amber-100"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => openEditModal(product)} className="gap-1 border-amber-300 text-amber-800 hover:bg-amber-100">
                       <Edit2 size={14} /> Edit
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setDeleteId(product.id)}
-                      className="gap-1"
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => setDeleteId(product.id)} className="gap-1">
                       <Trash2 size={14} /> Delete
                     </Button>
                   </div>
@@ -555,15 +435,41 @@ export default function AdminProductsPage() {
       </div>
     </div>
 
+    {/* ── Edit Modal ── */}
+    {editingProduct && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !editUploading && setEditingProduct(null)} />
+        <div className="relative bg-amber-50 border-2 border-amber-200 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-amber-950/30">
+          <div className="flex items-center justify-between p-6 border-b border-amber-200">
+            <h2 className="text-2xl font-bold text-amber-950">Edit Product</h2>
+            <button onClick={() => setEditingProduct(null)} className="text-stone-400 hover:text-stone-600">
+              <X size={22} />
+            </button>
+          </div>
+          <form onSubmit={handleUpdate} className="p-6 space-y-4">
+            <ProductFormFields
+              formData={editFormData} setFormData={setEditFormData}
+              imageFile={editImageFile} setImageFile={setEditImageFile}
+              imagePreview={editImagePreview} setImagePreview={setEditImagePreview}
+              uploading={editUploading} fileInputRef={editFileInputRef}
+            />
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" disabled={editUploading} className="bg-amber-800 hover:bg-amber-700 text-amber-50">
+                {editUploading ? 'Uploading...' : 'Update Product'}
+              </Button>
+              <Button type="button" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100" onClick={() => setEditingProduct(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+
     {/* ── Delete confirmation modal ── */}
     {deleteId && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={() => !deleteLoading && setDeleteId(null)}
-        />
-        {/* Modal */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !deleteLoading && setDeleteId(null)} />
         <div className="relative bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 max-w-sm w-full shadow-2xl shadow-amber-950/30">
           <div className="flex flex-col items-center text-center gap-4">
             <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center">
@@ -573,25 +479,15 @@ export default function AdminProductsPage() {
               <h3 className="text-xl font-bold text-amber-950 mb-1">Delete Product</h3>
               <p className="text-stone-600 text-sm">
                 Are you sure you want to delete{' '}
-                <span className="font-semibold text-amber-900">
-                  {products.find(p => p.id === deleteId)?.name ?? 'this product'}
-                </span>
+                <span className="font-semibold text-amber-900">{products.find(p => p.id === deleteId)?.name ?? 'this product'}</span>
                 ? This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-3 w-full pt-2">
-              <button
-                onClick={() => setDeleteId(null)}
-                disabled={deleteLoading}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-amber-900 bg-amber-50 text-amber-900 transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(69,26,3)] hover:bg-amber-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
-              >
+              <button onClick={() => setDeleteId(null)} disabled={deleteLoading} className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-amber-900 bg-amber-50 text-amber-900 transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(69,26,3)] hover:bg-amber-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50">
                 Cancel
               </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                disabled={deleteLoading}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-red-700 bg-red-600 text-white transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(153,27,27)] hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50"
-              >
+              <button onClick={() => handleDelete(deleteId)} disabled={deleteLoading} className="flex-1 px-4 py-2.5 text-sm font-semibold uppercase tracking-wide border-2 border-red-700 bg-red-600 text-white transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(153,27,27)] hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-50">
                 {deleteLoading ? 'Deleting...' : 'Delete'}
               </button>
             </div>
