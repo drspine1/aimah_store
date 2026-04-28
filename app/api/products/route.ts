@@ -58,13 +58,15 @@ export async function POST(request: NextRequest) {
   if (!profile?.is_admin) return err('Forbidden', 403)
 
   const body = await request.json()
-  const { name, description, price, image_url, stock, category } = body as {
+  const { name, description, price, image_url, stock, category, rating, reviews_count } = body as {
     name?: string
     description?: string
     price?: number
     image_url?: string
     stock?: number
     category?: string
+    rating?: number
+    reviews_count?: number
   }
 
   if (!name || typeof price !== 'number' || price < 0) {
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('products')
-    .insert([{ name, description, price, image_url, stock, category }])
+    .insert([{ name, description, price, image_url, stock, category, rating: rating ?? 0, reviews_count: reviews_count ?? 0 }])
     .select()
     .single()
 
