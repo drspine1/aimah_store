@@ -73,12 +73,12 @@ function HeroSection() {
               Premium Quality Store
             </span>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-amber-50">
-              Discover Products{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-300">
-                You'll Love
-              </span>
-            </h1>
+            <TextGenerateEffect
+              words="Discover Products You'll Love"
+              className="font-extrabold max-w-lg"
+              textClassName="text-amber-50 text-4xl md:text-5xl lg:text-6xl leading-tight"
+              duration={0.4}
+            />
 
             <TextGenerateEffect
               words="Thousands of curated products at unbeatable prices. Fast shipping, easy returns, and secure checkout."
