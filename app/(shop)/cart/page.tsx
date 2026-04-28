@@ -22,6 +22,8 @@ export default function CartPage() {
 
   const fetchCart = useCallback(async () => {
     try {
+      // Run cleanup first — silently expire carts older than 1 hour
+      await fetch('/api/cart/cleanup')
       const res = await fetch('/api/cart')
       const result = await res.json()
       if (result.success) {

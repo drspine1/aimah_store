@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useRefetchOnFocus } from '@/hooks/use-refetch-on-focus'
 import { Order } from '@/lib/types'
 import Link from 'next/link'
+import { AlertTriangle } from 'lucide-react'
 
 const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as const
 type OrderStatus = typeof ORDER_STATUSES[number]
@@ -21,10 +22,14 @@ const STATUS_COLOURS: Record<OrderStatus, string> = {
   cancelled:  'bg-red-100 text-red-800',
 }
 
+type LowStockProduct = { id: string; name: string; stock: number }
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [lowStock, setLowStock] = useState<LowStockProduct[]>([])
+  const [dismissLowStock, setDismissLowStock] = useState(false)
   const router = useRouter()
 
   const fetchOrders = useCallback(async () => {
@@ -48,6 +53,13 @@ export default function AdminOrdersPage() {
         .from('profiles').select('is_admin').eq('id', data.user.id).single()
       if (!profile?.is_admin) { router.push('/'); return }
       fetchOrders()
+      // Fetch low-stock products (stock < 3)
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name, stock')
+        .lt('stock', 3)
+        .order('stock', { ascending: true })
+      if (products) setLowStock(products)
     })
   }, [router, fetchOrders])
 
@@ -85,6 +97,38 @@ export default function AdminOrdersPage() {
             <Button variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100">Manage Products</Button>
           </Link>
         </div>
+
+        {/* ── Low stock alert ── */}
+        {!dismissLowStock && lowStock.length > 0 && (
+          <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-xl p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="text-red-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-bold text-red-800 mb-1">
+                    Low Stock Alert — {lowStock.length} product{lowStock.length !== 1 ? 's' : ''} running low
+                  </p>
+                  <ul className="space-y-0.5">
+                    {lowStock.map((p) => (
+                      <li key={p.id} className="text-sm text-red-700">
+                        <span className="font-semibold">{p.name}</span>
+                        {' — '}
+                        {p.stock === 0
+                          ? <span className="font-bold text-red-900">Out of stock</span>
+                          : <span>{p.stock} unit{p.stock !== 1 ? 's' : ''} left</span>
+                        }
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/admin/products" className="inline-block mt-2 text-sm font-semibold text-red-800 underline hover:text-red-900">
+                    Go to Products →
+                  </Link>
+                </div>
+              </div>
+              <button onClick={() => setDismissLowStock(true)} className="text-red-400 hover:text-red-600 shrink-0 text-lg leading-none">✕</button>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           {ORDER_STATUSES.map((s) => {
